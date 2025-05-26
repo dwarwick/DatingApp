@@ -61,6 +61,11 @@ builder.Services.AddMudServices(config =>
 
 var app = builder.Build();
 
+
+
+
+
+
 // Seed users and roles
 using (var scope = app.Services.CreateScope())
 {
