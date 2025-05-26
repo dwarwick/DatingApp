@@ -2,6 +2,7 @@ using DatingApp.Components;
 using DatingApp.Data;
 using DatingApp.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Register AuthService
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
+
+// Add Blazor authentication state provider
+builder.Services.AddScoped<AuthenticationStateProvider, DatingApp.Services.ServerAuthenticationStateProvider>();
+builder.Services.AddAuthorizationCore();
 
 var baseAddress = builder.Configuration["AppBaseUrl"] ?? "https://localhost:7026/";
 builder.Services.AddHttpClient("Default", client =>
@@ -105,6 +110,13 @@ app.MapPost("/api/login", async (HttpContext http, SignInManager<ApplicationUser
     return Results.Ok();
 })
 .WithName("Login");
+
+// Minimal API endpoint for logout
+app.MapPost("/api/logout", async (SignInManager<ApplicationUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Ok();
+});
 
 app.Run();
 
