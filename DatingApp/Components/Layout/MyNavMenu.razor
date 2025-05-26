@@ -1,0 +1,74 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inherits MyNavMenuModel
+
+<MudAppBar Elevation="4" Fixed="true">
+    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+    <MudImage Src="images/logo_200_60.png" />
+    <MudSpacer />
+
+    <MudHidden Breakpoint="Breakpoint.SmAndDown">
+        <MudSwitch Value="@DarkTheme" Label="Dark Theme" ValueChanged="DarkThemeChanged" />
+    </MudHidden>
+    <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
+        <MudSwitch Value="@DarkTheme" Label="Dark Theme" ValueChanged="DarkThemeChanged" Size="MudBlazor.Size.Small"  />
+    </MudHidden>
+    <MudHidden Breakpoint="Breakpoint.SmAndDown">
+        <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="mx-2" Href="/">Home</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="mx-2" Href="/blogs">Blogs</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="mx-2" Href="/documentation">Documentation</MudButton>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <MudMenu Label="Admin" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Color="Color.Inherit">
+                    <MudMenuItem Href="/admin/feedback">Manage Feedback</MudMenuItem>                    
+                    <MudMenuItem Href="/admin/settings">Settings Management</MudMenuItem>
+                    <MudMenuItem Href="/admin/logs">System Logs</MudMenuItem>
+                    <MudMenuItem Href="/ManageRolePermissions">Manage Permissions</MudMenuItem>                   
+                </MudMenu>
+            </Authorized>
+        </AuthorizeView>
+        
+       
+        <div class="mx-1">
+            <AuthorizeView>
+                <Authorized>
+                    <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="mx-2" Href="logout">Logout</MudButton>
+                </Authorized>
+                <NotAuthorized>
+                    <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="mx-2" Href="login">Login</MudButton>
+                    <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="mx-2" Href="register">Register</MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </MudHidden>    
+</MudAppBar>
+
+<MudDrawer @bind-Open="_drawerOpen" Anchor="MudBlazor.Anchor.Left" Variant="DrawerVariant.Temporary" Elevation="1">
+    <MudDrawerHeader>Menu</MudDrawerHeader>
+    <MudNavMenu>
+        <AuthorizeView>
+            <Authorized>
+                <MudNavLink Href="logout">Logout</MudNavLink>
+            </Authorized>
+            <NotAuthorized>
+                <MudNavLink Href="login">Login</MudNavLink>
+                <MudNavLink Href="register">Register</MudNavLink>
+            </NotAuthorized>
+        </AuthorizeView>
+        <MudNavLink Href="/" Match="NavLinkMatch.All">Home</MudNavLink>
+        <MudNavLink Href="/blogs" Match="NavLinkMatch.All">Blogs</MudNavLink>
+        <MudNavLink Href="/documentation">Documentation</MudNavLink>
+        <AuthorizeView Roles="Admin">
+            <Authorized>
+                <MudNavGroup Title="Admin" Expanded="false">
+                    <MudNavLink Href="/admin/feedback">Manage Feedback</MudNavLink>
+                    <MudNavLink Href="/admin/settings">Settings Management</MudNavLink>
+                    <MudNavLink Href="/admin/logs">System Logs</MudNavLink>
+                    <MudNavLink Href="/ManageRolePermissions">Manage Permissions</MudNavLink>
+                    
+                </MudNavGroup>
+            </Authorized>
+        </AuthorizeView>
+        
+    
+    </MudNavMenu>
+</MudDrawer>

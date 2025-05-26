@@ -84,6 +84,16 @@ h1:focus {
     min-height: 0;
     padding: 2rem;
     background: #f5f5f5;
+    padding-top: 4.5rem; /* Adjust to match MudAppBar height (default ~64px, 4.5rem = 72px) */
+}
+
+/* Fix for MudAppBar overlaying content: add top padding to main content equal to appbar height */
+
+@media (max-width: 600px) {
+    .mainlayout-main {
+        padding-top: 3.5rem; /* Smaller appbar on mobile */
+        height: Calc(100vh-50px - var(--mud-appbar-height));
+    }
 }
 
 .mainlayout-footer {
@@ -91,7 +101,9 @@ h1:focus {
     background: #263238;
     color: #fff;
     padding: 1rem 2rem;
-    position: sticky;
+    position: absolute;
     bottom: 0;
+    width:100vw;
+    height:50px;
     z-index: 10;
 }
