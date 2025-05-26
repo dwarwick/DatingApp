@@ -27,5 +27,26 @@ namespace DatingApp.Services
             var result = await _signInManager.PasswordSignInAsync(username, password, isPersistent: true, lockoutOnFailure: false);
             return result.Succeeded;
         }
+
+        public async Task<(bool Success, string ErrorMessage)> Register(string username, string password)
+        {
+            var existingUser = await _userManager.FindByNameAsync(username);
+            if (existingUser != null)
+            {
+                return (false, "An account with this email already exists.");
+            }
+
+            var user = new ApplicationUser { UserName = username, Email = username };
+            var result = await _userManager.CreateAsync(user, password);
+            if (result.Succeeded)
+            {
+                return (true, null);
+            }
+            else
+            {
+                var error = string.Join("; ", result.Errors.Select(e => e.Description));
+                return (false, error);
+            }
+        }
     }
 }
