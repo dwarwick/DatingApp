@@ -57,6 +57,8 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 });
 
+
+
 var app = builder.Build();
 
 
