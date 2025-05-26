@@ -1,0 +1,20 @@
+@page "/logout"
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var success = await JS.InvokeAsync<bool>("logoutPost", "/api/logout");
+        if (success)
+        {
+            Snackbar.Add("You have been logged out.", Severity.Success);
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+        else
+        {
+            Snackbar.Add("Logout failed.", Severity.Error);
+        }
+    }
+}
