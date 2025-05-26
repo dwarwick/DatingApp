@@ -1,0 +1,65 @@
+@page "/register"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager Navigation
+@inject DatingApp.Services.IAuthService AuthService
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-6 mx-auto" MaxWidth="400px">
+    <MudText Typo="Typo.h5" Class="mb-4">Register</MudText>
+    <EditForm Model="registerModel" OnValidSubmit="HandleRegister">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <MudTextField @bind-Value="registerModel.Username" Label="Email" For="@(() => registerModel.Username)" Required="true" Validation="ValidateEmail" />
+        <MudTextField @bind-Value="registerModel.Password" Label="Password" For="@(() => registerModel.Password)" InputType="InputType.Password" Required="true" />
+        <MudTextField @bind-Value="registerModel.ConfirmPassword" Label="Confirm Password" For="@(() => registerModel.ConfirmPassword)" InputType="InputType.Password" Required="true" Validation="ValidatePasswordMatch" />
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" FullWidth>Register</MudButton>
+    </EditForm>
+</MudPaper>
+
+@code {
+    private RegisterModel registerModel = new();
+
+    private async Task HandleRegister()
+    {
+        if (registerModel.Password != registerModel.ConfirmPassword)
+        {
+            Snackbar.Add("Passwords do not match.", Severity.Error);
+            return;
+        }
+        var (success, error) = await AuthService.Register(registerModel.Username, registerModel.Password);
+        if (!success)
+        {
+            Snackbar.Add(error ?? "Registration failed.", Severity.Error);
+        }
+        else
+        {
+            Snackbar.Add("Registration successful! Please login.", Severity.Success);
+            Navigation.NavigateTo("/login");
+        }
+    }
+
+    private string ValidateEmail(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return "Email is required.";
+        var emailAttr = new EmailAddressAttribute();
+        return emailAttr.IsValid(value) ? string.Empty : "Invalid email address.";
+    }
+
+    private string ValidatePasswordMatch(string value)
+    {
+        if (registerModel.Password != value)
+            return "Passwords do not match.";
+        return string.Empty;
+    }
+
+    public class RegisterModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Username { get; set; }
+        [Required]
+        public string Password { get; set; }
+        [Required]
+        public string ConfirmPassword { get; set; }
+    }
+}
