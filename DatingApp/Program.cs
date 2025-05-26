@@ -1,12 +1,56 @@
 using DatingApp.Components;
+using DatingApp.Data;
+using DatingApp.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add environment-based appsettings.json files
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add ApplicationDbContext with SQL Server and Identity (int PKs)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options => { })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// Add cookie authentication
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/login";
+        options.ExpireTimeSpan = TimeSpan.FromHours(5);
+    });
+
+// Register AuthService
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddHttpContextAccessor();
+
+var baseAddress = builder.Configuration["AppBaseUrl"] ?? "https://localhost:7026/";
+builder.Services.AddHttpClient("Default", client =>
+{
+    client.BaseAddress = new Uri(baseAddress);
+});
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("Default"));
+
 var app = builder.Build();
+
+// Seed users and roles
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    UserSeeder.SeedUsersAndRolesAsync(services).GetAwaiter().GetResult();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -18,11 +62,33 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
 app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+// Minimal API endpoint for login
+app.MapPost("/api/login", async (HttpContext http, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, [FromBody] LoginRequest login) =>
+{
+    var user = await userManager.FindByNameAsync(login.Username);
+    if (user == null)
+        return Results.Unauthorized();
+    var result = await signInManager.CheckPasswordSignInAsync(user, login.Password, false);
+    if (!result.Succeeded)
+        return Results.Unauthorized();
+    await signInManager.SignInAsync(user, isPersistent: true);
+    return Results.Ok();
+})
+.WithName("Login");
+
 app.Run();
+
+public class LoginRequest
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
+}
