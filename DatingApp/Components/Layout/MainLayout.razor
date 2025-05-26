@@ -3,24 +3,23 @@
 <CascadingAuthenticationState>
     <MudThemeProvider />
     <MudPopoverProvider />
-    @* Needed for dialogs *@
     <MudDialogProvider />
-    @* Needed for snackbars *@
     <MudSnackbarProvider />
 
-    <MudGrid Class="mainlayout-root">
-        <MudItem xs="12" Class="mainlayout-header">
-            <MyNavMenu />
-        </MudItem>
-        <MudItem xs="12" Class="mainlayout-main">
-            <MudContainer>
-                @Body
-            </MudContainer>
-        </MudItem>
-        <MudItem xs="12" Class="mainlayout-footer">
+    <MudStack>
+        <MyNavMenu />
+
+        <div class="mainlayout-main">
+            @Body
+        </div>
+
+
+        <div class="mainlayout-footer">
             <span>DatingApp © 2024</span>
-        </MudItem>
-    </MudGrid>
+        </div>
+    </MudStack>
+
+
 
 </CascadingAuthenticationState>
 
