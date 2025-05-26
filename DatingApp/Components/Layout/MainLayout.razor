@@ -1,18 +1,25 @@
 ﻿@inherits LayoutComponentBase
 
 <MudThemeProvider />
-
 <MudPopoverProvider />
-
 @* Needed for dialogs *@
 <MudDialogProvider />
-
 @* Needed for snackbars *@
 <MudSnackbarProvider />
 
-
-            @Body
-        
+<MudGrid Class="mainlayout-root">
+    <MudItem xs="12" Class="mainlayout-header">
+        <nav>
+            <span>DatingApp Navbar</span>
+        </nav>
+    </MudItem>
+    <MudItem xs="12" Class="mainlayout-main">
+        @Body
+    </MudItem>
+    <MudItem xs="12" Class="mainlayout-footer">
+        <span>DatingApp © 2024</span>
+    </MudItem>
+</MudGrid>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
